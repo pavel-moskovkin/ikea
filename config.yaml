@@ -1,0 +1,10 @@
+apilisten: 8080
+app:
+  usdrub: 80
+db:
+  address: localhost:5430
+  username: root
+  password: toor
+  dbname: postgres
+  insecure: true
+loglevel: info
