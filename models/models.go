@@ -3,7 +3,7 @@ package models
 import (
 	"time"
 
-	"github.com/satori/go.uuid"
+	"github.com/google/uuid"
 	"github.com/uptrace/bun"
 )
 
@@ -18,7 +18,7 @@ const (
 type User struct {
 	bun.BaseModel `bun:"table:users,alias:u"`
 
-	UUID       uuid.NullUUID `bun:",type:uuid,default:uuid_generate_v4()"`
+	UUID       *uuid.UUID `bun:",pk,type:uuid,default:uuid_generate_v4()"`
 	FirstName  string
 	LastName   string
 	MiddleName string

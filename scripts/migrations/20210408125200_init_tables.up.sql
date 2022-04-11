@@ -8,7 +8,7 @@ CREATE TYPE sex_type AS ENUM (
 
 CREATE TABLE IF NOT EXISTS users
 (
-    uuid        uuid DEFAULT uuid_generate_v4(),
+    uuid        uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
     first_name  VARCHAR(30)  NOT NULL,
     last_name   VARCHAR(30)  NOT NULL,
     middle_name VARCHAR(30),

@@ -8,7 +8,7 @@ import (
 	"ikea/config"
 	"ikea/models"
 
-	"github.com/satori/go.uuid"
+	"github.com/google/uuid"
 	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/dialect/pgdialect"
 )
@@ -55,8 +55,8 @@ func NewStorageFromDB(db *bun.DB) *Storage {
 	return &Storage{db: db}
 }
 
-func (s *Storage) UserGet(ctx context.Context, uuid uuid.NullUUID) (models.User, error) {
-	user := models.User{UUID: uuid}
+func (s *Storage) UserGet(ctx context.Context, uuid uuid.UUID) (models.User, error) {
+	user := models.User{UUID: &uuid}
 	err := s.db.NewSelect().Model(&user).WherePK().Scan(ctx)
 	if err != nil {
 		return models.User{}, err
@@ -64,15 +64,15 @@ func (s *Storage) UserGet(ctx context.Context, uuid uuid.NullUUID) (models.User,
 	return user, nil
 }
 
-func (s *Storage) UserCreate(ctx context.Context, user models.User) (uuid.NullUUID, error) {
+func (s *Storage) UserCreate(ctx context.Context, user models.User) (uuid.UUID, error) {
 	res, err := s.db.NewInsert().Model(&user).Returning("uuid").Exec(ctx)
 	if err != nil {
-		return uuid.NullUUID{}, err
+		return uuid.Nil, err
 	}
 
 	if rowsAffected, _ := res.RowsAffected(); rowsAffected != 1 {
-		return uuid.NullUUID{}, errors.New("invalid rows affected count")
+		return uuid.Nil, errors.New("invalid rows affected count")
 	}
 
-	return user.UUID, nil
+	return *user.UUID, nil
 }
