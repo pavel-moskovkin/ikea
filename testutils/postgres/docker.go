@@ -64,19 +64,7 @@ func (d *dockerTest) Run(ctx context.Context) error {
 
 	databaseUrl := fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=disable", d.cfg.Username, d.cfg.Password, hostAndPort, d.cfg.DBName)
 	log.Println("Connecting to database on url: ", databaseUrl)
-	// _ = resource.Expire(120)
-
-	// var db *sql.DB
-	// pool.MaxWait = 10 * time.Second
-	// if err = pool.Retry(func() error {
-	// 	db, err = sql.Open("postgres", databaseUrl)
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// 	return db.Ping()
-	// }); err != nil {
-	// 	log.Fatalf("Could not connect to docker: %s", err)
-	// }
+	_ = resource.Expire(600)
 
 	// TODO SetTimeZoneUTC
 
