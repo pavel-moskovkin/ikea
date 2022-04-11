@@ -1,7 +1,7 @@
 package api
 
 import (
-	"localshop/service/manager"
+	"ikea/service/manager"
 )
 
 type Api struct {

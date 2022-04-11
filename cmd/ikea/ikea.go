@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"os"
 
-	"localshop/config"
-	"localshop/logger"
-	"localshop/migrations"
-	"localshop/storage"
+	"ikea/config"
+	"ikea/logger"
+	"ikea/migrations"
+	"ikea/storage"
 )
 
 func main() {
@@ -45,7 +45,7 @@ func runMigrations(cfg config.Config) {
 	}
 
 	ctx := context.Background()
-	err = migrations.Run(ctx, store.DB, cfg)
+	err = migrations.Run(ctx, store.Db(), cfg)
 	if err != nil {
 		panic(fmt.Sprintf("failed to run migrations: %s", err.Error()))
 	}

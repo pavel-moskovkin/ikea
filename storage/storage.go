@@ -1,21 +1,20 @@
 package storage
 
 import (
+	"context"
 	"database/sql"
-	"time"
+	"errors"
 
-	"localshop/config"
-	"localshop/models"
+	"ikea/config"
+	"ikea/models"
 
-	"github.com/google/uuid"
+	"github.com/satori/go.uuid"
 	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/dialect/pgdialect"
-	"github.com/uptrace/bun/driver/pgdriver"
-	"github.com/uptrace/bun/extra/bundebug"
 )
 
 type Storage struct {
-	*bun.DB
+	db *bun.DB
 
 	config config.Config
 }
@@ -23,28 +22,14 @@ type Storage struct {
 func NewDB(cfg config.Config) (*Storage, error) {
 	// postgresql://[user[:password]@][netloc][:port][/dbname][?param1=value1&...]
 	// dsn := fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=%v",
-	// 	cfg.Username, cfg.Password, cfg.Address, cfg.DBName, cfg.SslSecure)
+	// 	cfg.Username, cfg.Password, cfg.Address, cfg.DBName, cfg.Insecure)
 
-	connector := pgdriver.NewConnector(
-		pgdriver.WithNetwork("tcp"),
-		pgdriver.WithAddr(cfg.DbConfig.Address),
-		pgdriver.WithInsecure(cfg.DbConfig.Insecure),
-		pgdriver.WithUser(cfg.DbConfig.Username),
-		pgdriver.WithPassword(cfg.DbConfig.Password),
-		pgdriver.WithDatabase(cfg.DbConfig.DBName),
-		pgdriver.WithTimeout(5*time.Second), // add these params to config, in case if needed
-		pgdriver.WithDialTimeout(5*time.Second),
-		pgdriver.WithReadTimeout(5*time.Second),
-		pgdriver.WithWriteTimeout(5*time.Second),
-	)
+	connector := NewConnectorFromConfig(cfg.DB)
 
 	sqlDB := sql.OpenDB(connector)
 	db := bun.NewDB(sqlDB, pgdialect.New())
 
-	db.AddQueryHook(bundebug.NewQueryHook(
-		bundebug.WithVerbose(true),
-		bundebug.FromEnv("BUNDEBUG"),
-	))
+	db.AddQueryHook(CustomQueryHook())
 
 	err := db.Ping()
 	if err != nil {
@@ -52,32 +37,42 @@ func NewDB(cfg config.Config) (*Storage, error) {
 	}
 
 	return &Storage{
-		DB:     db,
+		db:     db,
 		config: cfg,
 	}, nil
 }
 
 func (s *Storage) Db() *bun.DB {
-	return s.DB
+	return s.db
 }
 
-type UserStore interface {
+type DataStore interface {
 	UserGet(uuid uuid.UUID) (models.User, error)
 	UserCreate(user models.User) (uuid.UUID, error)
 }
 
-type UserStorage struct {
-	db Storage
+func NewStorageFromDB(db *bun.DB) *Storage {
+	return &Storage{db: db}
 }
 
-func (s *UserStorage) UserGet(uuid uuid.UUID) (models.User, error) {
-	_, err := s.db.Exec("SELECT 1")
+func (s *Storage) UserGet(ctx context.Context, uuid uuid.NullUUID) (models.User, error) {
+	user := models.User{UUID: uuid}
+	err := s.db.NewSelect().Model(&user).WherePK().Scan(ctx)
 	if err != nil {
 		return models.User{}, err
 	}
-	return models.User{}, nil
+	return user, nil
 }
 
-func (s *UserStorage) UserCreate(user models.User) (uuid.UUID, error) {
-	return uuid.Nil, nil
+func (s *Storage) UserCreate(ctx context.Context, user models.User) (uuid.NullUUID, error) {
+	res, err := s.db.NewInsert().Model(&user).Returning("uuid").Exec(ctx)
+	if err != nil {
+		return uuid.NullUUID{}, err
+	}
+
+	if rowsAffected, _ := res.RowsAffected(); rowsAffected != 1 {
+		return uuid.NullUUID{}, errors.New("invalid rows affected count")
+	}
+
+	return user.UUID, nil
 }

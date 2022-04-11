@@ -3,8 +3,8 @@ package migrations
 import (
 	"context"
 
-	"localshop/config"
-	"localshop/scripts/migrations"
+	"ikea/config"
+	"ikea/scripts/migrations"
 
 	"github.com/pkg/errors"
 	"github.com/uptrace/bun"

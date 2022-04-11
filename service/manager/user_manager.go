@@ -1,8 +1,8 @@
 package manager
 
 import (
-	"localshop/models"
-	"localshop/storage"
+	"ikea/models"
+	"ikea/storage"
 
 	"github.com/google/uuid"
 	"github.com/pkg/errors"

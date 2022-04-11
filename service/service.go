@@ -1,8 +1,8 @@
 package service
 
 import (
-	"localshop/config"
-	"localshop/storage"
+	"ikea/config"
+	"ikea/storage"
 )
 
 type Service struct {
