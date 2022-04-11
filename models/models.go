@@ -26,3 +26,25 @@ type User struct {
 	Sex        Sex
 	BirthDate  time.Time
 }
+
+type Order struct {
+	bun.BaseModel `bun:"table:orders,alias:o"`
+
+	UUID        *uuid.UUID `bun:",pk,type:uuid,default:uuid_generate_v4()"`
+	Number      uint32
+	UserID      uuid.UUID
+	ItemIDs     []uuid.UUID
+	CreatedAt   time.Time
+	CompletedAt *time.Time
+	DeletedAt   *time.Time
+}
+
+type Item struct {
+	bun.BaseModel `bun:"table:items,alias:i"`
+
+	UUID        *uuid.UUID `bun:",pk,type:uuid,default:uuid_generate_v4()"`
+	Name        string
+	Description string
+	Price       float32
+	LeftInStock uint32
+}

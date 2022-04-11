@@ -47,8 +47,20 @@ func (s *Storage) Db() *bun.DB {
 }
 
 type DataStore interface {
-	UserGet(uuid uuid.UUID) (models.User, error)
 	UserCreate(user models.User) (uuid.UUID, error)
+	UserGet(uuid uuid.UUID) (models.User, error)
+	UserUpdate(user models.User) error
+	UserDelete(uuid uuid.UUID) error
+
+	OrderCreate(order models.Order) (int, error)
+	OrderGet(number int) (models.Order, error)
+	OrderUpdate(order models.Order) error
+	OrderDelete(number int) error
+
+	ItemCreate(item models.Item) (uuid.UUID, error)
+	ItemGet(uuid uuid.UUID) (models.Item, error)
+	ItemUpdate(item models.Item) error
+	ItemDelete(uuid uuid.UUID) error
 }
 
 func NewStorageFromDB(db *bun.DB) *Storage {
